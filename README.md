@@ -45,15 +45,24 @@ php artisan key:generate
 ```
 php artisan migrate --seed
 ```
+### 8. Link storage for file uploading
+```
+php artisan storage:link
+```
 
-### 8. Build frontend assets
+### 9. Build frontend assets
 ```
 npm run build
 ```
 
-### 9. Start the Laravel development server
+### 10. Start the Laravel development server
 ```
 php artisan serve
+```
+
+### 11. Update Laravel server url into the .env (used in spatie image)
+```
+APP_URL=http://127.0.0.1:8000
 ```
 
 ## Default Test Login Credentials
