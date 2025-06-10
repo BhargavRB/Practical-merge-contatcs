@@ -15,7 +15,7 @@ class StoreContactRequest extends FormRequest
         return [
           'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:contacts,email'],
-            'phone' => ['required', 'string', 'max:20'],
+            'phone' => ['required', 'string', 'max:16'],
             'gender' => ['required', 'in:Male,Female'],
             'profile_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
             'additional_file' => ['nullable', 'file', 'mimes:pdf,doc,docx,txt', 'max:4096'],

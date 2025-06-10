@@ -63,10 +63,10 @@
             <td class="p-2 border space-x-2">
                 @if(!$contact->is_merged)
                 <button class="merge-contact text-blue-500 font-medium" data-id="{{ $contact->id }}">Merge</button>
-                <button class="delete-contact text-red-600 font-medium" data-id="{{ $contact->id }}">Delete</button>
                 @else
                 <span class="text-green-600 italic">Merged</span>
                 @endif
+                <button class="delete-contact text-red-600 font-medium" data-id="{{ $contact->id }}">Delete</button>
             </td>
         </tr>
     @endforeach
