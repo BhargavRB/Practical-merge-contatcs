@@ -41,4 +41,50 @@ class ContactService
 
         return ['success' => 'Contact added successfully'];
     }
+
+    public static function merge($request)
+    {
+        $master = Contact::findOrFail($request->master_id);
+        $secondary = Contact::findOrFail($request->secondary_id);
+
+        // Merge custom fields
+        $masterFields = $master->custom_fields ? json_decode($master->custom_fields,true) : [];
+        $secondaryFields = $secondary->custom_fields ? json_decode($secondary->custom_fields,true) : [];
+
+        foreach ($secondaryFields as $key => $value) {
+            if (!isset($masterFields[$key])) {
+                $masterFields[$key] = $value;
+            } else {
+                $existingValue = $masterFields[$key];
+                if (is_array($existingValue)) {
+                    if (!in_array($value, $existingValue)) {
+                        $existingValue[] = $value;
+                    }
+                    $masterFields[$key] = $existingValue;
+                } else {
+                    if ($existingValue !== $value) {
+                        $masterFields[$key] = array_unique([$existingValue, $value]);
+                    }
+                }
+            }
+        } 
+        
+        if ($master->email !== $secondary->email) {
+            $masterFields['Secondary Email'] = $secondary->email;
+        }
+
+        if ($master->phone !== $secondary->phone) {
+            $masterFields['Secondary Phone'] = $secondary->phone;
+        }
+
+        $master->custom_fields = json_encode($masterFields);
+        $secondary->is_merged = true;
+        $secondary->merged_into = $master->id;
+        $secondary->save();
+
+        // Save master updates
+        $master->save();
+
+        return ['success' => 'Contacts merged successfully'];
+    }
 }

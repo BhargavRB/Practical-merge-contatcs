@@ -78,6 +78,25 @@
 
     <!-- Contact Table -->
     <div id="contactsTable"></div>
+
+    <div id="mergeModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 items-center justify-center">
+        <div class="bg-white rounded-lg p-6 space-y-4 max-w-md mx-auto shadow-xl relative p-4 w-auto max-w-2xl max-h-full" style="width:50%;">
+            <h2 class="text-lg font-semibold">Select Master Contact</h2>
+            <form id="mergeForm">
+                @csrf
+                <input type="hidden" name="secondary_id" id="secondary_id">
+    
+                <label class="block mb-2">Select master contact:</label>
+                <select name="master_id" id="master_id" class="border p-2 w-full rounded" required>
+                </select>
+    
+                <div class="flex justify-end space-x-2 pt-4 gap-4">
+                    <button type="button" id="cancelMerge" class="bg-red-600 text-white px-4 py-2 rounded-md">Cancel</button>
+                    <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-md">Confirm Merge</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -149,9 +168,50 @@ $(function(){
         `);
     });
 
-// Remove custom field row
-$(document).on('click', '.removeCustomField', function(){
-    $(this).parent().remove();
+    $(document).on('click', '.merge-contact', function(){
+        let secondaryId = $(this).data('id');
+        $('#secondary_id').val(secondaryId);
+        $('#master_id').empty().append('<option value="">Select Master</option>');
+
+        $.get("/contacts/master-list/" + secondaryId, function(contacts){
+            $.each(contacts, function(index, contact){
+                $('#master_id').append(
+                    `<option value="${contact.id}">${contact.name} (${contact.email})</option>`
+                );
+            });
+            $('#mergeModal').removeClass('hidden').addClass('flex');
+        });
+    });
+
+    $(document).on('click', '.removeCustomField', function(){
+        $(this).parent().remove();
+    });
+
+    $(document).on('click', '.merge-contact', function(){
+        let contactId = $(this).data('id');
+        $('#secondary_id').val(contactId);
+        $('#mergeModal').removeClass('hidden flex').addClass('flex');
+    });
+
+    $('#cancelMerge').click(function(){
+        $('#mergeModal').addClass('hidden').removeClass('flex');
+    });
+
+    $('#mergeForm').on('submit', function(e){
+    e.preventDefault();
+    $.ajax({
+        url: "{{ route('contacts.merge') }}",
+        type: "POST",
+        data: $(this).serialize(),
+        success: function(res){
+            toastr.success(res.success);
+            $('#mergeModal').addClass('hidden').removeClass('flex');
+            loadContacts();
+        },
+        error: function(xhr){
+            toastr.error(xhr.responseJSON.message);
+        }
+    });
 });
 
 });

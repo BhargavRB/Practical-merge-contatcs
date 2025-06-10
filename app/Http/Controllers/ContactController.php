@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\MergeContactRequest;
 use App\Http\Requests\StoreContactRequest;
 use App\Models\Contact;
 use App\Services\ContactService;
@@ -55,5 +56,28 @@ class ContactController extends Controller
         ->get();    
 
         return view('contacts.contact_table', compact('contacts'));
+    }
+
+    public function merge(MergeContactRequest $request)
+    {
+        $response = [];
+        try {
+            $response = ContactService::merge($request);
+        }catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    
+        return response()->json($response);
+    }
+
+    public function getMasterList($id)
+    {
+        $contacts = Contact::where('id', '!=', $id)
+                    ->where('user_id', Auth::id())
+                    ->where('is_merged', false)
+                    ->select(['id', 'name', 'email'])
+                    ->get();
+
+        return response()->json($contacts);
     }
 }

@@ -13,7 +13,11 @@
     </thead>
     <tbody>
     @foreach($contacts as $contact)
+    @if($contact->is_merged)
+        <tr class="border-t bg-gray-100 text-gray-400 italic">
+    @else
         <tr class="border-t">
+    @endif
             <td class="p-2 border">{{ $contact->name }}</td>
             <td class="p-2 border">{{ $contact->email }}</td>
             <td class="p-2 border">{{ $contact->phone }}</td>
@@ -26,7 +30,14 @@
                 @if(count($customFields) > 0)
                     <ul class="list-disc list-inside space-y-1">
                         @foreach($customFields as $key => $value)
-                            <li><strong>{{ e($key) }}:</strong> {{ e($value) }}</li>
+                            <li>
+                                <strong>{{ e($key) }}:</strong>
+                                @if(is_array($value))
+                                    {{ implode(' | ', $value) }}
+                                @else
+                                    {{ e($value) }}
+                                @endif
+                            </li>
                         @endforeach
                     </ul>
                 @else
@@ -48,9 +59,14 @@
             @else
                 <span class="text-gray-400 italic">No File</span>
             @endif
-            </td>
+            </td>   
             <td class="p-2 border space-x-2">
+                @if(!$contact->is_merged)
+                <button class="merge-contact text-blue-500 font-medium" data-id="{{ $contact->id }}">Merge</button>
                 <button class="delete-contact text-red-600 font-medium" data-id="{{ $contact->id }}">Delete</button>
+                @else
+                <span class="text-green-600 italic">Merged</span>
+                @endif
             </td>
         </tr>
     @endforeach
